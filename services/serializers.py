@@ -7,6 +7,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields=['id','name','description']
 
 class ServiceImageSerializer(serializers.ModelSerializer):
+    image=serializers.ImageField()
     class Meta:
         model = ServiceImage
         fields = ['id', 'image']

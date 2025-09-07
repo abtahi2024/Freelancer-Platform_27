@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9s0g_@%@0q+rs(eu8u4^0*2*h7uzdr&oqnw0mh61xo@(qs+%#t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [".vercel.app",'127.0.0.1']
 
 AUTH_USER_MODEL='users.User'
 
@@ -92,19 +96,29 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Freelancer_managents.wsgi.application'
+WSGI_APPLICATION = 'Freelancer_managents.wsgi.app'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('dbname'),
+        'USER': config('user'),
+        'PASSWORD': config('password'),
+        'HOST': config('host'),
+        'PORT': config('port')
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -124,6 +138,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# clodinary storag
+cloudinary.config(
+    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
+    api_key=config("CLOUDINARY_API_KEY"),
+    api_secret=config("CLOUDINARY_API_SECRET"),
+    secure=config("CLOUDINARY_SECURE", cast=bool)
+)
+
+#Media storage setting
+DEFAULT_FILE_STORAGE='cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -162,8 +186,8 @@ REST_FRAMEWORK={
 
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
-   'ACCESS_TOKEN_LIFETIME':timedelta(days=12),
-   "REFRESH_TOKEN_LIFETIME": timedelta(days=12),
+   'ACCESS_TOKEN_LIFETIME':timedelta(days=100),
+   "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
 }
 
 DJOSER = {
