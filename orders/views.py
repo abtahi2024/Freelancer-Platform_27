@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated,IsAdminUser
+from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from orders.models import ServiceOrder
 from orders.serializers import ServiceOrderSerializer,CreateServiceOrderSerializer,UpdateServiceOrderSerializer
 from orders.services import ServiceOrderService 
 from drf_yasg.utils import swagger_auto_schema
+
 # Create your views here.
 
 class ServiceOrderViewSet(ModelViewSet):
@@ -23,7 +24,8 @@ class ServiceOrderViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ['update','partial_update','destroy','update_status']:
             return [IsAdminUser()]
-        return [IsAuthenticated()]
+        return [IsAuthenticatedOrReadOnly()]
+        # return [IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action=='create':
@@ -34,12 +36,7 @@ class ServiceOrderViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        if getattr(self, 'swagger_fake_view', False):
-            context['buyer']=None
-        else:
-            if self.request.user.is_authenticated:
-                context['buyer'] = self.request.user 
-            else: None
+        context['buyer'] = self.request.user if self.request.user.is_authenticated else None
         return context
 
     def get_queryset(self):
@@ -53,7 +50,7 @@ class ServiceOrderViewSet(ModelViewSet):
 
         if self.request.user.is_staff:
             return ServiceOrder.objects.prefetch_related('items__service').all()
-        elif self.request.is_authenticated:
+        elif self.request.user.is_authenticated:
             return ServiceOrder.objects.prefetch_related('items__service').filter(buyer=self.request.user)
         return ServiceOrder.objects.none()
     

@@ -102,11 +102,14 @@ class ServiceViewSet(ModelViewSet):
     search_fields=['title','description']
     ordering_fields=['price','updated_at']
     permission_classes=[IsAuthenticatedOrReadOnly]
-    permission_classes=[IsAdminOrReadOnly]
+    # permission_classes=[IsAdminOrReadOnly]
 
     def get_queryset(self):
         return Service.objects.prefetch_related('images','reviews').all()
     
+    def perform_create(self, serializer):
+        serializer.save(seller=self.request.user) 
+
     @swagger_auto_schema(
             operation_summary='List all Services',
             operation_description='Get a Pageinated list of service with filtering searching, and ordering',
@@ -185,15 +188,15 @@ class ServiceImageViewSet(ModelViewSet):
 
 class ReviewViewSet(ModelViewSet):
     serializer_class=ReviewSerializer
-    permission_classes=[IsAuthenticatedOrReadOnly]
-    permission_classes=[IsReviewAuthorOrReadonly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsReviewAuthorOrReadonly]
+
     # permission_classes=[IsAdminOrReadOnly]
 
     def get_queryset(self):
         return Review.objects.filter(service_id=self.kwargs.get('service_pk'))
     
     def perform_create(self, serializer):
-        serializer.save(buyer=self.request.user)
+        serializer.save(buyer=self.request.user,service_id=self.kwargs['service_pk'])
     
     def perform_update(self, serializer):
         return serializer.save(buyer=self.request.user)

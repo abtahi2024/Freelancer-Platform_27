@@ -37,28 +37,31 @@ class ServiceOrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['buyer', 'total_price', 'created_at', 'updated_at']
 
 
-class CreateServiceOrderSerializer(serializers.Serializer): #একসাথে multiple services নিয়ে order create করতে পারবে।
+# You need to POST as JSON body.
+class CreateServiceOrderSerializer(serializers.Serializer):
+    items = serializers.ListField(child=serializers.DictField(), write_only=True)
 
-    buyer_id=serializers.IntegerField()
-    items=serializers.ListField(child=serializers.DictField(),write_only=True) #প্রতিটি service একটা dictionary হয়ে আসবে
-
-    def validate_items(self,items):
+    def validate_items(self, items):
         if not items:
             raise serializers.ValidationError("Order must contain at least one service")
+        for item in items:
+            if "service_id" not in item:
+                raise serializers.ValidationError("Each item must include 'service_id'")
         return items
-    
-    def create(self, validated_data):
-        buyer = self.context['buyer']
-        services_data = validated_data['items']
 
+    def create(self, validated_data):
+        buyer = self.context['buyer']  # logged-in user
+        services_data = validated_data['items']
         try:
-            order=ServiceOrderService.create_order(buyer=buyer,services_data=services_data)
+            order = ServiceOrderService.create_order(buyer=buyer, services_data=services_data)
             return order
         except ValueError as e:
             raise serializers.ValidationError(str(e))
 
     def to_representation(self, instance):
-        return ServiceOrderService(instance).data
+        return ServiceOrderSerializer(instance).data
+
+
     
 class UpdateServiceOrderSerializer(serializers.ModelSerializer):
     class Meta:
