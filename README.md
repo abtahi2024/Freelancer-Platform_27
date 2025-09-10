@@ -163,13 +163,6 @@ This project is licensed under the MIT License.
 | POST   | `/api/v1/orders/{id}/cancel/`        | Cancel own order                                 | Buyer         |
 | PATCH  | `/api/v1/orders/{id}/update_status/` | Update order status                              | Admin         |
 
-## 🔔 Notifications
-| Method | Endpoint                                        | Description                      | Permission  |
-| ------ | ----------------------------------------------- | -------------------------------- | ----------- |
-| GET    | `/api/v1/orders/{order_id}/notifications/`      | List notifications for an order  | Buyer/Admin |
-| POST   | `/api/v1/orders/{order_id}/notifications/`      | Create notification              | Admin       |
-| PATCH  | `/api/v1/orders/{order_id}/notifications/{id}/` | Mark notification as read/unread | Buyer/Admin |
-
 
 ## 👨‍💻 Author
 [abtahi2024](https://github.com/abtahi2024)
