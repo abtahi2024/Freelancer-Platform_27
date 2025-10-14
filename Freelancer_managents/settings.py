@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     #debugtools
     "debug_toolbar",
     'django_filters',
+    # cors-headers
+    "corsheaders",
 ]
 
 INTERNAL_IPS = [
@@ -66,6 +68,9 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
+    # CorsMiddleware 
+    "corsheaders.middleware.CorsMiddleware",
+
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -98,6 +103,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Freelancer_managents.wsgi.app'
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+
+    # "https://example.com",
+    # "https://sub.example.com",
+    # "http://localhost:8080",
+    # "http://127.0.0.1:9000",
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
