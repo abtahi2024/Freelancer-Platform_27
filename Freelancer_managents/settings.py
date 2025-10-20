@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9s0g_@%@0q+rs(eu8u4^0*2*h7uzdr&oqnw0mh61xo@(qs+%#t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [".vercel.app",'127.0.0.1']
 
@@ -207,7 +207,7 @@ DJOSER = {
     'EMAIL_FRONTEND_PROTOCOL':config('FRONTEND_PROTOCOL'),
     'EMAIL_FRONTEND_DOMAIN':config('FRONTEND_DOMAIN'),
     'EMAIL_FRONTEND_SITE_NAME':'FreelancerPlatform',
-    'USER_ID_FIELD': 'id',
+    # 'USER_ID_FIELD': 'id',
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}/',
     # 'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL':'activate/{uid}/{token}/',
