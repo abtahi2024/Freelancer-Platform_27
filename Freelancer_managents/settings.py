@@ -208,9 +208,9 @@ DJOSER = {
     'EMAIL_FRONTEND_DOMAIN':config('FRONTEND_DOMAIN'),
     'EMAIL_FRONTEND_SITE_NAME':'FreelancerPlatform',
     # 'USER_ID_FIELD': 'id',
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}/',
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     # 'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL':'activate/{uid}/{token}/',
+    'ACTIVATION_URL':'activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
       'user_create': 'users.serializers.UserCreateSerializer',
