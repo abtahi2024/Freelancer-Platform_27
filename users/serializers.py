@@ -30,4 +30,6 @@ class UserSerializer(BaseUserSerializer):
             'address',
             'phone_number',
             'bio',
+            'is_staff',
         ]
+        read_only_fields=['is_staff']
