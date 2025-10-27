@@ -184,7 +184,7 @@ def initiate_payment(request):
 def payment_success(request):
     order_id=request.data.get("tran_id").split('_')[1]
     order=ServiceOrder.objects.get(id=order_id)
-    order.status="In Progress"
+    order.status="Completed"
     order.save()
     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
