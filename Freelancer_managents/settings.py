@@ -240,4 +240,5 @@ else:
     EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 
 
-
+BACKEND_URL=config("BACKEND_URL")
+FRONTEND_URL=config("FRONTEND_URL")
