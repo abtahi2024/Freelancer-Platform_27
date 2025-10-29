@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action,api_view
 from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from orders.models import ServiceOrder
+from orders.models import ServiceOrder,ServiceOrderItem
 from orders.serializers import ServiceOrderSerializer,CreateServiceOrderSerializer,UpdateServiceOrderSerializer
 from orders.services import ServiceOrderService 
 from drf_yasg.utils import swagger_auto_schema
@@ -11,6 +11,7 @@ from sslcommerz_lib import SSLCOMMERZ
 from rest_framework import status
 from django.conf import settings as main_setting
 from django.http import HttpResponseRedirect
+from rest_framework.views import APIView
 # Create your views here.
 
 class ServiceOrderViewSet(ModelViewSet):
@@ -195,3 +196,11 @@ def payment_cancel(request):
 @api_view(['POST'])
 def payment_fail(request):
     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+
+class HasOrderedService(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request,service_id):
+        user=request.user
+        has_Ordered=ServiceOrderItem.objects.filter(order__user=user,service_id=service_id).exists()
+        return Response({"hasOrdered":has_Ordered})

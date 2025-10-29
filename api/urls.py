@@ -1,7 +1,7 @@
 from django.urls import path, include
 from services.views import CategoryViewSet,ServiceViewSet,ServiceImageViewSet,ReviewViewSet
 from rest_framework_nested import routers
-from orders.views import ServiceOrderViewSet,initiate_payment,payment_success,payment_cancel,payment_fail
+from orders.views import ServiceOrderViewSet,initiate_payment,payment_success,payment_cancel,payment_fail,HasOrderedService
 # from users.views import UserViewSet
 
 router=routers.DefaultRouter()
@@ -27,4 +27,5 @@ urlpatterns = [
     path('payment/success/',payment_success,name='payment-success'),
     path('payment/cancel/',payment_cancel,name='payment-cancel'),
     path('payment/fail/',payment_fail,name='payment-fail'),
+    path('orders/has-ordered/<int:service_id>',HasOrderedService.as_view()),
 ]
