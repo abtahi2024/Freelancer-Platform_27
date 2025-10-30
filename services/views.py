@@ -199,7 +199,7 @@ class ReviewViewSet(ModelViewSet):
         serializer.save(buyer=self.request.user,service_id=self.kwargs['service_pk'])
     
     def perform_update(self, serializer):
-        return serializer.save(buyer=self.request.user)
+        return serializer.save()
     
     def get_serializer_context(self):
         return {'service_id': self.kwargs.get('service_pk')}
