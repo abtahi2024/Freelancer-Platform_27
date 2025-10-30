@@ -202,5 +202,5 @@ class HasOrderedService(APIView):
 
     def get(self,request,service_id):
         user=request.user
-        has_Ordered=ServiceOrderItem.objects.filter(order__user=user,service_id=service_id).exists()
+        has_Ordered=ServiceOrderItem.objects.filter(order__buyer=user,service_id=service_id).exists()
         return Response({"hasOrdered":has_Ordered})
