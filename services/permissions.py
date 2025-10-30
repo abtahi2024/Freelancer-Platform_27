@@ -13,4 +13,4 @@ class IsReviewAuthorOrReadonly(permissions.BasePermission):
         if request.user.is_staff:
             return True
 
-        return obj.user == request.user
+        return obj.buyer == request.user
