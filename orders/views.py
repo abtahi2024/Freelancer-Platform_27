@@ -250,7 +250,7 @@ def payment_success(request):
         order.status = "Completed"
         order.save()
     except ServiceOrder.DoesNotExist:
-        return HttpResponseRedirect({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
 
     # JSON response instead of redirect
     return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
@@ -258,12 +258,12 @@ def payment_success(request):
 
 @api_view(['POST'])
 def payment_fail(request):
-    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
 
 
 @api_view(['POST'])
 def payment_cancel(request):
-    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
 
 class HasOrderedService(APIView):
     permission_classes=[IsAuthenticated]
