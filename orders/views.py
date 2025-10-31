@@ -187,15 +187,18 @@ def payment_success(request):
     order=ServiceOrder.objects.get(id=order_id)
     order.status="Completed"
     order.save()
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    frontend_url = getattr(main_setting, "FRONTEND_URL", "https://freelancer-client-40.vercel.app")
+    return HttpResponseRedirect(f"{frontend_url}/dashboard/orders/")
 
 @api_view(['POST'])
 def payment_cancel(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    frontend_url = getattr(main_setting, "FRONTEND_URL", "https://freelancer-client-40.vercel.app")
+    return HttpResponseRedirect(f"{frontend_url}/dashboard/orders/")
 
 @api_view(['POST'])
 def payment_fail(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    frontend_url = getattr(main_setting, "FRONTEND_URL", "https://freelancer-client-40.vercel.app")
+    return HttpResponseRedirect(f"{frontend_url}/dashboard/orders/")
 
 class HasOrderedService(APIView):
     permission_classes=[IsAuthenticated]
