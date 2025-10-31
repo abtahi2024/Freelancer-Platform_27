@@ -238,11 +238,18 @@ def initiate_payment(request):
     return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+from django.http import HttpResponseRedirect
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from orders.models import ServiceOrder
+from django.conf import settings as main_setting
+
+# Success
+@api_view(['GET', 'POST'])
 def payment_success(request):
-    tran_id = request.data.get("tran_id")
+    tran_id = request.GET.get("tran_id") or request.data.get("tran_id")
     if not tran_id:
-        return HttpResponseRedirect({"error": "Transaction ID missing"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Transaction ID missing"}, status=400)
 
     order_id = tran_id.split('_')[1]
     try:
@@ -250,20 +257,20 @@ def payment_success(request):
         order.status = "Completed"
         order.save()
     except ServiceOrder.DoesNotExist:
-        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Order not found"}, status=404)
 
-    # JSON response instead of redirect
-    return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
-
-@api_view(['POST'])
+# Fail
+@api_view(['GET', 'POST'])
 def payment_fail(request):
-    return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
-
-@api_view(['POST'])
+# Cancel
+@api_view(['GET', 'POST'])
 def payment_cancel(request):
-    return HttpResponseRedirect({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+
 
 class HasOrderedService(APIView):
     permission_classes=[IsAuthenticated]
