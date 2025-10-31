@@ -104,7 +104,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Freelancer_managents.wsgi.app'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://freelancer-client-40.vercel.app"
+    "https://freelancer-client-40.vercel.app",
     "http://localhost:5173",
     # "https://example.com",
     # "https://sub.example.com",
