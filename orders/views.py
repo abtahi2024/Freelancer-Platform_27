@@ -241,18 +241,16 @@ def initiate_payment(request):
 # Success
 @api_view(['GET', 'POST'])
 def payment_success(request):
+    # SSLCommerz tran_id GET method এ আসতে পারে
     tran_id = request.GET.get("tran_id") or request.data.get("tran_id")
-    if not tran_id:
-        return Response({"error": "Transaction ID missing"}, status=400)
-
-    order_id = tran_id.split('_')[1]
-    try:
-        order = ServiceOrder.objects.get(id=order_id)
-        order.status = "Completed"
-        order.save()
-    except ServiceOrder.DoesNotExist:
-        return Response({"error": "Order not found"}, status=404)
-
+    if tran_id:
+        order_id = tran_id.split('_')[1]
+        try:
+            order = ServiceOrder.objects.get(id=order_id)
+            order.status = "Completed"
+            order.save()
+        except ServiceOrder.DoesNotExist:
+            pass  # order না পাওয়া গেলে শুধু redirect
     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
 # Fail
