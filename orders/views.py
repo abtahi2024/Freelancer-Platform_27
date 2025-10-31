@@ -197,15 +197,16 @@ class ServiceOrderViewSet(ModelViewSet):
 # def payment_fail(request):
 #     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
+
 @api_view(['POST'])
 def initiate_payment(request):
     user = request.user
     amount = request.data.get("amount")
     order_id = request.data.get("orderId")
-    num_items = request.data.get("numItems")
+    num_items = request.data.get("numItems") 
 
     settings = {
-        'store_id':'phima68e538afdcefc',
+        'store_id': 'phima68e538afdcefc',
         'store_pass': 'phima68e538afdcefc@ssl',
         'issandbox': True
     }
@@ -238,30 +239,32 @@ def initiate_payment(request):
     return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Success
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def payment_success(request):
-    # SSLCommerz tran_id GET method এ আসতে পারে
-    tran_id = request.GET.get("tran_id") or request.data.get("tran_id")
-    if tran_id:
-        order_id = tran_id.split('_')[1]
-        try:
-            order = ServiceOrder.objects.get(id=order_id)
-            order.status = "Completed"
-            order.save()
-        except ServiceOrder.DoesNotExist:
-            pass  # order না পাওয়া গেলে শুধু redirect
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    tran_id = request.data.get("tran_id")
+    if not tran_id:
+        return Response({"error": "Transaction ID missing"}, status=status.HTTP_400_BAD_REQUEST)
 
-# Fail
-@api_view(['GET', 'POST'])
+    order_id = tran_id.split("_")[1]
+    try:
+        order = ServiceOrder.objects.get(id=order_id)
+        order.status = "Completed"
+        order.save()
+    except ServiceOrder.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Frontend redirect handled by React
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+
+
+@api_view(['POST'])
 def payment_fail(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
 
-# Cancel
-@api_view(['GET', 'POST'])
+
+@api_view(['POST'])
 def payment_cancel(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
 
 
 class HasOrderedService(APIView):
