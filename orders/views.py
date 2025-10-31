@@ -238,12 +238,6 @@ def initiate_payment(request):
     return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-from django.http import HttpResponseRedirect
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from orders.models import ServiceOrder
-from django.conf import settings as main_setting
-
 # Success
 @api_view(['GET', 'POST'])
 def payment_success(request):
