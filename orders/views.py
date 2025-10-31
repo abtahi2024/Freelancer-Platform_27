@@ -144,58 +144,134 @@ class ServiceOrderViewSet(ModelViewSet):
         return Response({'status': f"Order status updated to {request.data.get('status')}"})
 
 
+# @api_view(['POST'])
+# def initiate_payment(request):
+#     user=request.user
+#     amount=request.data.get("amount")
+#     order_id=request.data.get("orderId")
+#     num_items=request.data.get("numItems")
+
+#     settings = { 'store_id':'phima68e538afdcefc', 'store_pass': 'phima68e538afdcefc@ssl', 'issandbox': True }
+#     sslcz = SSLCOMMERZ(settings)
+#     post_body = {}
+#     post_body['total_amount'] = amount
+#     post_body['currency'] = "BDT"
+#     post_body['tran_id'] = f"trx_{order_id}"
+#     post_body['success_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/success/"
+#     post_body['fail_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/fail/"
+#     post_body['cancel_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/"
+#     post_body['emi_option'] = 0
+#     post_body['cus_name'] = f"{user.first_name} {user.last_name}"
+#     post_body['cus_email'] = user.email
+#     post_body['cus_phone'] = user.phone_number
+#     post_body['cus_add1'] = user.address
+#     post_body['cus_city'] = "Dhaka"
+#     post_body['cus_country'] = "Bangladesh"
+#     post_body['shipping_method'] = "NO"
+#     post_body['multi_card_name'] = ""
+#     post_body['num_of_item'] = num_items
+#     post_body['product_name'] = "Freelancer Products"
+#     post_body['product_category'] = "General"
+#     post_body['product_profile'] = "general"
+
+
+#     response = sslcz.createSession(post_body) # API response
+#     # print(response)
+#     if response.get("status")=='SUCCESS':
+#         return Response({"payment_url":response['GatewayPageURL']})
+#     return Response({"error":"Payment initiation failed"},status=status.HTTP_400_BAD_REQUEST)
+
+# @api_view(['POST'])
+# def payment_success(request):
+#     order_id=request.data.get("tran_id").split('_')[1]
+#     order=ServiceOrder.objects.get(id=order_id)
+#     order.status="Completed"
+#     order.save()
+#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+
+# @api_view(['POST'])
+# def payment_cancel(request):
+#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+
+# @api_view(['POST'])
+# def payment_fail(request):
+#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from orders.models import ServiceOrder
+from django.conf import settings as main_setting
+from sslcommerz_lib import SSLCOMMERZ
+
 @api_view(['POST'])
 def initiate_payment(request):
-    user=request.user
-    amount=request.data.get("amount")
-    order_id=request.data.get("orderId")
-    num_items=request.data.get("numItems")
+    user = request.user
+    amount = request.data.get("amount")
+    order_id = request.data.get("orderId")
+    num_items = request.data.get("numItems")
 
-    settings = { 'store_id':'phima68e538afdcefc', 'store_pass': 'phima68e538afdcefc@ssl', 'issandbox': True }
+    settings = {
+        'store_id':'phima68e538afdcefc',
+        'store_pass': 'phima68e538afdcefc@ssl',
+        'issandbox': True
+    }
     sslcz = SSLCOMMERZ(settings)
-    post_body = {}
-    post_body['total_amount'] = amount
-    post_body['currency'] = "BDT"
-    post_body['tran_id'] = f"trx_{order_id}"
-    post_body['success_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/success/"
-    post_body['fail_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/fail/"
-    post_body['cancel_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/"
-    post_body['emi_option'] = 0
-    post_body['cus_name'] = f"{user.first_name} {user.last_name}"
-    post_body['cus_email'] = user.email
-    post_body['cus_phone'] = user.phone_number
-    post_body['cus_add1'] = user.address
-    post_body['cus_city'] = "Dhaka"
-    post_body['cus_country'] = "Bangladesh"
-    post_body['shipping_method'] = "NO"
-    post_body['multi_card_name'] = ""
-    post_body['num_of_item'] = num_items
-    post_body['product_name'] = "Freelancer Products"
-    post_body['product_category'] = "General"
-    post_body['product_profile'] = "general"
+    post_body = {
+        'total_amount': amount,
+        'currency': "BDT",
+        'tran_id': f"trx_{order_id}",
+        'success_url': f"{main_setting.BACKEND_URL}/api/v1/payment/success/",
+        'fail_url': f"{main_setting.BACKEND_URL}/api/v1/payment/fail/",
+        'cancel_url': f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/",
+        'emi_option': 0,
+        'cus_name': f"{user.first_name} {user.last_name}",
+        'cus_email': user.email,
+        'cus_phone': user.phone_number,
+        'cus_add1': user.address,
+        'cus_city': "Dhaka",
+        'cus_country': "Bangladesh",
+        'shipping_method': "NO",
+        'multi_card_name': "",
+        'num_of_item': num_items,
+        'product_name': "Freelancer Products",
+        'product_category': "General",
+        'product_profile': "general",
+    }
 
+    response = sslcz.createSession(post_body)
+    if response.get("status") == 'SUCCESS':
+        return Response({"payment_url": response['GatewayPageURL']})
+    return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
-    response = sslcz.createSession(post_body) # API response
-    # print(response)
-    if response.get("status")=='SUCCESS':
-        return Response({"payment_url":response['GatewayPageURL']})
-    return Response({"error":"Payment initiation failed"},status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def payment_success(request):
-    order_id=request.data.get("tran_id").split('_')[1]
-    order=ServiceOrder.objects.get(id=order_id)
-    order.status="Completed"
-    order.save()
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    tran_id = request.data.get("tran_id")
+    if not tran_id:
+        return Response({"error": "Transaction ID missing"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-def payment_cancel(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    order_id = tran_id.split('_')[1]
+    try:
+        order = ServiceOrder.objects.get(id=order_id)
+        order.status = "Completed"
+        order.save()
+    except ServiceOrder.DoesNotExist:
+        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # JSON response instead of redirect
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+
 
 @api_view(['POST'])
 def payment_fail(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+
+
+@api_view(['POST'])
+def payment_cancel(request):
+    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
 
 class HasOrderedService(APIView):
     permission_classes=[IsAuthenticated]
