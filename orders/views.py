@@ -254,7 +254,7 @@ def initiate_payment(request):
 @api_view(['POST', 'GET'])
 def payment_success(request):
     logger.info(f"FINAL REDIRECT URL: {main_setting.FRONTEND_URL}/dashboard/orders/")
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
+    return HttpResponseRedirect(f"https://freelancer-client-40.vercel.app/dashboard/orders/")
 
 
 @api_view(['POST', 'GET'])
