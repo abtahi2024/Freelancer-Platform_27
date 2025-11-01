@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action,api_view,permission_classes
-from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly,AllowAny
+from rest_framework.decorators import action,api_view
+from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from orders.models import ServiceOrder,ServiceOrderItem
 from orders.serializers import ServiceOrderSerializer,CreateServiceOrderSerializer,UpdateServiceOrderSerializer
@@ -12,8 +12,6 @@ from rest_framework import status
 from django.conf import settings as main_setting
 from django.http import HttpResponseRedirect
 from rest_framework.views import APIView
-import logging
-from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 class ServiceOrderViewSet(ModelViewSet):
@@ -146,140 +144,58 @@ class ServiceOrderViewSet(ModelViewSet):
         return Response({'status': f"Order status updated to {request.data.get('status')}"})
 
 
-
-# @api_view(['POST'])
-# def initiate_payment(request):
-#     user=request.user
-#     amount=request.data.get("amount")
-#     order_id=request.data.get("orderId")
-#     num_items=request.data.get("numItems")
-
-#     settings = { 'store_id':'phima68e538afdcefc', 'store_pass': 'phima68e538afdcefc@ssl', 'issandbox': True }
-#     sslcz = SSLCOMMERZ(settings)
-#     post_body = {}
-#     post_body['total_amount'] = amount
-#     post_body['currency'] = "BDT"
-#     post_body['tran_id'] = f"trx_{order_id}"
-#     post_body['success_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/success/"
-#     post_body['fail_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/fail/"
-#     post_body['cancel_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/"
-#     post_body['emi_option'] = 0
-#     post_body['cus_name'] = f"{user.first_name} {user.last_name}"
-#     post_body['cus_email'] = user.email
-#     post_body['cus_phone'] = user.phone_number
-#     post_body['cus_add1'] = user.address
-#     post_body['cus_city'] = "Dhaka"
-#     post_body['cus_country'] = "Bangladesh"
-#     post_body['shipping_method'] = "NO"
-#     post_body['multi_card_name'] = ""
-#     post_body['num_of_item'] = num_items
-#     post_body['product_name'] = "Freelancer Products"
-#     post_body['product_category'] = "General"
-#     post_body['product_profile'] = "general"
-
-
-#     response = sslcz.createSession(post_body) # API response
-#     # print(response)
-#     if response.get("status")=='SUCCESS':
-#         return Response({"payment_url":response['GatewayPageURL']})
-#     return Response({"error":"Payment initiation failed"},status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['POST'])
-# def payment_success(request):
-#     order_id=request.data.get("tran_id").split('_')[1]
-#     order=ServiceOrder.objects.get(id=order_id)
-#     order.status="Completed"
-#     order.save()
-#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
-
-# @api_view(['POST'])
-# def payment_cancel(request):
-#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
-
-# @api_view(['POST'])
-# def payment_fail(request):
-#     return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
-
-
-logger = logging.getLogger(__name__)
-
-
 @api_view(['POST'])
 def initiate_payment(request):
-    try:
-        user = request.user
-        amount = request.data.get("amount")
-        order_id = request.data.get("orderId")
-        num_items = request.data.get("numItems")
+    user=request.user
+    amount=request.data.get("amount")
+    order_id=request.data.get("orderId")
+    num_items=request.data.get("numItems")
 
-        if not all([amount, order_id, num_items]):
-            return Response({"error": "Missing payment data"}, status=status.HTTP_400_BAD_REQUEST)
-
-        settings = { 'store_id':'phima68e538afdcefc', 'store_pass': 'phima68e538afdcefc@ssl', 'issandbox': True }
-
-        sslcz = SSLCOMMERZ(settings)
-        post_body = {
-            'total_amount': amount,
-            'currency': "BDT",
-            'tran_id': f"txn_{order_id}",
-            'success_url': f"{main_setting.BACKEND_URL}/api/v1/payment/success/",
-            'fail_url': f"{main_setting.BACKEND_URL}/api/v1/payment/fail/",
-            'cancel_url': f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/",
-            'ipn_url': f"{main_setting.BACKEND_URL}/api/v1/payment/ipn/",
-            'emi_option': 0,
-            'cus_name': f"{user.first_name} {user.last_name}",
-            'cus_email': user.email,
-            'cus_phone': user.phone_number,
-            'cus_add1': user.address,
-            'cus_city': "Dhaka",
-            'cus_country': "Bangladesh",
-            'shipping_method': "NO",
-            'product_name': "E-commerce Products",
-            'product_category': "General",
-            'product_profile': "general",
-            'num_of_item': num_items,
-        }
-
-        response = sslcz.createSession(post_body)
-
-        if response.get("status") == 'SUCCESS':
-            return Response({"payment_url": response['GatewayPageURL']})
-
-        return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        logger.error("Payment initiation error", exc_info=True)
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    settings = { 'store_id':'phima68e538afdcefc', 'store_pass': 'phima68e538afdcefc@ssl', 'issandbox': True }
+    sslcz = SSLCOMMERZ(settings)
+    post_body = {}
+    post_body['total_amount'] = amount
+    post_body['currency'] = "BDT"
+    post_body['tran_id'] = f"trx_{order_id}"
+    post_body['success_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/success/"
+    post_body['fail_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/fail/"
+    post_body['cancel_url'] = f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/"
+    post_body['emi_option'] = 0
+    post_body['cus_name'] = f"{user.first_name} {user.last_name}"
+    post_body['cus_email'] = user.email
+    post_body['cus_phone'] = user.phone_number
+    post_body['cus_add1'] = user.address
+    post_body['cus_city'] = "Dhaka"
+    post_body['cus_country'] = "Bangladesh"
+    post_body['shipping_method'] = "NO"
+    post_body['multi_card_name'] = ""
+    post_body['num_of_item'] = num_items
+    post_body['product_name'] = "Freelancer Products"
+    post_body['product_category'] = "General"
+    post_body['product_profile'] = "general"
 
 
-@api_view(['POST', 'GET'])
+    response = sslcz.createSession(post_body) # API response
+    # print(response)
+    if response.get("status")=='SUCCESS':
+        return Response({"payment_url":response['GatewayPageURL']})
+    return Response({"error":"Payment initiation failed"},status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
 def payment_success(request):
-    logger.info(f"FINAL REDIRECT URL: {main_setting.FRONTEND_URL}/dashboard/orders/")
+    order_id=request.data.get("tran_id").split('_')[1]
+    order=ServiceOrder.objects.get(id=order_id)
+    order.status="Completed"
+    order.save()
     return HttpResponseRedirect(f"https://freelancer-client-40.vercel.app/dashboard/orders/")
 
-
-@api_view(['POST', 'GET'])
-def payment_cancel(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
-
-
-@api_view(['POST', 'GET'])
-def payment_fail(request):
-    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
-
-
-@csrf_exempt
 @api_view(['POST'])
-def payment_ipn(request):
-    try:
-        data = request.data
-        if data.get('status') == 'VALID':
-            order_id = data['tran_id'].split('_')[1]
-            order = ServiceOrder.objects.get(id=order_id)
-            order.status = "Completed"
-            order.save()
-    except Exception as e:
-        logger.error(f"IPN processing failed: {e}", exc_info=True)
-    return Response(status=status.HTTP_200_OK)
+def payment_cancel(request):
+    return HttpResponseRedirect(f"https://freelancer-client-40.vercel.app/dashboard/orders/")
+
+@api_view(['POST'])
+def payment_fail(request):
+    return HttpResponseRedirect(f"https://freelancer-client-40.vercel.app/dashboard/orders/")
 
 
 class HasOrderedService(APIView):
