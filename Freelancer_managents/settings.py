@@ -240,5 +240,9 @@ else:
     EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 
 
-BACKEND_URL=config("BACKEND_URL")
-FRONTEND_URL=config("FRONTEND_URL")
+FRONTEND_URL = config('FRONTEND_URL', default='https://freelancer-client-40.vercel.app')
+BACKEND_URL = config('BACKEND_URL', default='https://freelancer-platform-27.vercel.app')
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.info(f"FRONTEND_URL = {FRONTEND_URL}")
