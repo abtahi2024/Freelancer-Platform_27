@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action,api_view
-from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action,api_view,permission_classes
+from rest_framework.permissions import IsAuthenticated,IsAdminUser,IsAuthenticatedOrReadOnly,AllowAny
 from rest_framework.response import Response
 from orders.models import ServiceOrder,ServiceOrderItem
 from orders.serializers import ServiceOrderSerializer,CreateServiceOrderSerializer,UpdateServiceOrderSerializer
@@ -203,21 +203,22 @@ def initiate_payment(request):
     user = request.user
     amount = request.data.get("amount")
     order_id = request.data.get("orderId")
-    num_items = request.data.get("numItems") 
+    num_items = request.data.get("numItems")
 
     settings = {
-        'store_id': 'phima68e538afdcefc',
-        'store_pass': 'phima68e538afdcefc@ssl',
+        'store_id': main_setting.SSLCOMMERZE_STORE_ID,
+        'store_pass': main_setting.SSLCOMMERZE_STORE_PASS,
         'issandbox': True
     }
     sslcz = SSLCOMMERZ(settings)
     post_body = {
         'total_amount': amount,
         'currency': "BDT",
-        'tran_id': f"trx_{order_id}",
+        'tran_id': f"txn_{order_id}",
         'success_url': f"{main_setting.BACKEND_URL}/api/v1/payment/success/",
         'fail_url': f"{main_setting.BACKEND_URL}/api/v1/payment/fail/",
         'cancel_url': f"{main_setting.BACKEND_URL}/api/v1/payment/cancel/",
+        'ipn_url': f"{main_setting.BACKEND_URL}/api/v1/payment/ipn/",
         'emi_option': 0,
         'cus_name': f"{user.first_name} {user.last_name}",
         'cus_email': user.email,
@@ -239,32 +240,33 @@ def initiate_payment(request):
     return Response({"error": "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def payment_success(request):
-    tran_id = request.data.get("tran_id")
-    if not tran_id:
-        return Response({"error": "Transaction ID missing"}, status=status.HTTP_400_BAD_REQUEST)
+    tran_id = request.data.get("tran_id") or request.GET.get("tran_id")
+    if tran_id:
+        order_id = tran_id.replace("txn_", "")
+        try:
+            order = ServiceOrder.objects.get(id=order_id)
+            order.status = "Completed"
+            order.save()
+        except ServiceOrder.DoesNotExist:
+            print("Order not found")
 
-    order_id = tran_id.split("_")[1]
-    try:
-        order = ServiceOrder.objects.get(id=order_id)
-        order.status = "Completed"
-        order.save()
-    except ServiceOrder.DoesNotExist:
-        return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    # Frontend redirect handled by React
-    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    # Redirect to frontend orders page
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def payment_fail(request):
-    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
 def payment_cancel(request):
-    return Response({"redirect_url": f"{main_setting.FRONTEND_URL}/dashboard/orders/"})
+    return HttpResponseRedirect(f"{main_setting.FRONTEND_URL}/dashboard/orders/")
 
 
 class HasOrderedService(APIView):
